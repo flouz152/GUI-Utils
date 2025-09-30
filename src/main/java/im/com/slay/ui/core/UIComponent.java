@@ -36,6 +36,7 @@ public abstract class UIComponent {
     private Vec2 position = Vec2.ZERO;
     private Insets padding = Insets.NONE;
     private Insets margin = Insets.NONE;
+    private String identifier;
     private boolean visible = true;
     private ThemePalette palette = ThemePalette.DEFAULT;
     private final List<AnimationTimeline> timelines = new ArrayList<AnimationTimeline>();
@@ -114,6 +115,15 @@ public abstract class UIComponent {
         return margin;
     }
 
+    public UIComponent id(String id) {
+        this.identifier = id;
+        return this;
+    }
+
+    public String getId() {
+        return identifier;
+    }
+
     public ThemePalette getPalette() {
         return palette;
     }
@@ -124,6 +134,9 @@ public abstract class UIComponent {
         }
         this.palette = palette;
         onThemeChanged(palette);
+        for (UIComponent child : children) {
+            child.setPalette(palette);
+        }
     }
 
     public boolean isVisible() {

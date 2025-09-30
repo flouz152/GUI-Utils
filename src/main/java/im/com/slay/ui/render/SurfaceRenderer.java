@@ -21,6 +21,8 @@ public interface SurfaceRenderer {
 
     void drawRect(Rect rect, int color, double cornerRadius);
 
+    void drawCircle(Rect rect, int color, double scale);
+
     void drawImage(Rect rect, String resourceLocation, double opacity);
 
     void drawText(String text, Vec2 position, int color, double fontSize, double shadowStrength);

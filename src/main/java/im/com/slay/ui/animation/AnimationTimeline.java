@@ -59,6 +59,10 @@ public final class AnimationTimeline {
         return playing;
     }
 
+    public boolean isFinished() {
+        return !playing && time >= duration;
+    }
+
     public AnimationTimeline loop(boolean loop) {
         this.loop = loop;
         return this;

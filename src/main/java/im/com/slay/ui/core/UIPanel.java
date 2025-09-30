@@ -10,7 +10,7 @@ import im.com.slay.ui.render.SurfaceRendererExtensions;
  * Convenience container that draws a background panel with drop shadow like
  * modern overlay menus.
  */
-public final class UIPanel extends UIContainer {
+public class UIPanel extends UIContainer {
 
     private int backgroundColor = 0xF0181818;
     private double cornerRadius = 12;

@@ -39,6 +39,22 @@ public final class Rect {
         return position.getX() + size.getX();
     }
 
+    public double getWidth() {
+        return size.getX();
+    }
+
+    public double getHeight() {
+        return size.getY();
+    }
+
+    public double getCenterX() {
+        return position.getX() + size.getX() / 2.0;
+    }
+
+    public double getCenterY() {
+        return position.getY() + size.getY() / 2.0;
+    }
+
     public double getBottom() {
         return position.getY() + size.getY();
     }
@@ -76,6 +92,10 @@ public final class Rect {
                 new Vec2(position.getX() - horizontal, position.getY() - vertical),
                 new Vec2(size.getX() + horizontal * 2.0, size.getY() + vertical * 2.0)
         );
+    }
+
+    public Rect expand(Vec2 amount) {
+        return expand(amount.getX(), amount.getY());
     }
 
     @Override

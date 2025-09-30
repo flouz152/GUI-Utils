@@ -43,4 +43,42 @@ public final class ThemePalette {
         result.colors.putAll(other.colors);
         return result;
     }
+
+    public int getBackgroundColor() {
+        return color("background");
+    }
+
+    public int getSurfaceColor() {
+        return color("surface");
+    }
+
+    public int getPrimaryColor() {
+        return color("primary");
+    }
+
+    public int getPrimaryVariantColor() {
+        return color("primaryVariant");
+    }
+
+    public int getAccentColor() {
+        return color("accent");
+    }
+
+    public int getTextPrimaryColor() {
+        return color("textPrimary");
+    }
+
+    public int getTextSecondaryColor() {
+        return color("textSecondary");
+    }
+
+    public ThemePalette mutate(String slot, ColorMutation mutation) {
+        int original = color(slot);
+        int mutated = mutation.apply(original);
+        return new ThemePalette().merge(this).color(slot, mutated);
+    }
+
+    public interface ColorMutation {
+        int apply(int input);
+    }
 }
