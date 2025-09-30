@@ -63,6 +63,21 @@ public final class Rect {
                 && point.getY() >= getTop() && point.getY() <= getBottom();
     }
 
+    public Rect offset(double dx, double dy) {
+        return new Rect(new Vec2(position.getX() + dx, position.getY() + dy), size);
+    }
+
+    public Rect expand(double amount) {
+        return expand(amount, amount);
+    }
+
+    public Rect expand(double horizontal, double vertical) {
+        return new Rect(
+                new Vec2(position.getX() - horizontal, position.getY() - vertical),
+                new Vec2(size.getX() + horizontal * 2.0, size.getY() + vertical * 2.0)
+        );
+    }
+
     @Override
     public String toString() {
         return "Rect{" + "position=" + position + ", size=" + size + '}';

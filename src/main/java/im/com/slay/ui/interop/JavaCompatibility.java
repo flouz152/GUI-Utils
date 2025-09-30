@@ -25,12 +25,17 @@ public final class JavaCompatibility {
 
     private static final String JAVA_HOME_OVERRIDE = System.getProperty("slay.java21.home");
     private static URLClassLoader java21ClassLoader;
+    private static Boolean java21Available;
 
     private JavaCompatibility() {
     }
 
-    public static boolean isJava21Available() {
-        return locateJava21Runtime() != null;
+    public static synchronized boolean isJava21Available() {
+        if (java21Available != null) {
+            return java21Available.booleanValue();
+        }
+        java21Available = Boolean.valueOf(locateJava21Runtime() != null);
+        return java21Available.booleanValue();
     }
 
     public static synchronized ClassLoader java21ClassLoader() {
@@ -42,11 +47,23 @@ public final class JavaCompatibility {
             return JavaCompatibility.class.getClassLoader();
         }
         try {
-            URL url = runtime.toURI().toURL();
-            java21ClassLoader = new URLClassLoader(new URL[]{url}, JavaCompatibility.class.getClassLoader());
+            URL[] urls = computeRuntimeClasspath(runtime);
+            java21ClassLoader = new URLClassLoader(urls, JavaCompatibility.class.getClassLoader());
             return java21ClassLoader;
         } catch (IOException e) {
             return JavaCompatibility.class.getClassLoader();
+        }
+    }
+
+    public static <T> T withJava21(Java21Callable<T> callable, T fallback) {
+        ClassLoader loader = java21ClassLoader();
+        if (loader == JavaCompatibility.class.getClassLoader()) {
+            return fallback;
+        }
+        try {
+            return callable.call(loader);
+        } catch (Exception exception) {
+            return fallback;
         }
     }
 
@@ -76,10 +93,31 @@ public final class JavaCompatibility {
             }
         }
         File currentDir = new File(".");
-        File candidate = new File(currentDir, "java21/lib/slay-bridge.jar");
-        if (candidate.exists()) {
-            return candidate;
+        File candidateJar = new File(currentDir, "java21/lib/slay-bridge.jar");
+        if (candidateJar.exists()) {
+            return candidateJar;
+        }
+        File runtimeDir = new File(currentDir, "java21");
+        if (runtimeDir.exists() && runtimeDir.isDirectory()) {
+            return runtimeDir;
         }
         return null;
+    }
+
+    private static URL[] computeRuntimeClasspath(File runtime) throws IOException {
+        if (runtime.isDirectory()) {
+            File libDir = new File(runtime, "lib");
+            if (libDir.exists() && libDir.isDirectory()) {
+                File[] jars = libDir.listFiles();
+                if (jars != null) {
+                    URL[] urls = new URL[jars.length];
+                    for (int i = 0; i < jars.length; i++) {
+                        urls[i] = jars[i].toURI().toURL();
+                    }
+                    return urls;
+                }
+            }
+        }
+        return new URL[]{runtime.toURI().toURL()};
     }
 }
