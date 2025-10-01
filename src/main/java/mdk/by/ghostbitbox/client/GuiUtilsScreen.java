@@ -7,11 +7,14 @@ import im.com.slay.ui.core.UIConstraintContainer;
 import im.com.slay.ui.core.UIContext;
 import im.com.slay.ui.core.UIFlowContainer;
 import im.com.slay.ui.core.UILabel;
+import im.com.slay.ui.core.UIModal;
 import im.com.slay.ui.core.UIPanel;
 import im.com.slay.ui.core.UISpacer;
 import im.com.slay.ui.core.UITextField;
+import im.com.slay.ui.core.UIToggle;
 import im.com.slay.ui.geometry.Rect;
 import im.com.slay.ui.layout.FlexLayout;
+import im.com.slay.ui.layout.ConstraintLayout;
 import im.com.slay.ui.math.Vec2;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +42,12 @@ public class GuiUtilsScreen extends Screen {
     private final UITextField searchField;
     private final UILabel statusLabel;
     private final UIFlowContainer featureList;
+    private final UIToggle themeToggle;
+    private final UIButton showModalButton;
+    private final UIButton closeModalButton;
+    private final UIPanel modalWindow;
+    private final UISpacer modalBackdrop;
+    private final UIModal modal;
     private final List<String> features = Arrays.asList(
             "Constraint based контейнер",
             "Гибкий FlexLayout",
@@ -50,11 +59,13 @@ public class GuiUtilsScreen extends Screen {
             "Поддержка элементов ввода",
             "Анимации hover для кнопок"
     );
-    private final List<UIButton> buttons = new ArrayList<>();
+    private final List<UIButton> interactiveButtons = new ArrayList<>();
     private final Map<UIButton, String> buttonDescriptions = new LinkedHashMap<>();
     private String persistentStatus = "Наведите на кнопки, чтобы увидеть анимации";
 
     private final GuiSurfaceRenderer renderer;
+    private boolean darkThemeEnabled;
+    private boolean modalVisible;
 
     public GuiUtilsScreen() {
         super(new StringTextComponent("GUI Utils Showcase"));
@@ -76,11 +87,11 @@ public class GuiUtilsScreen extends Screen {
         UIFlowContainer buttonRow = new UIFlowContainer();
         buttonRow.setLayout(FlexLayout.horizontal().spacing(6.0));
 
-        UIButton elastic = createButton("Elastic pulse", AnimationStyle.ELASTIC,
+        UIButton elastic = createShowcaseButton("Elastic pulse", AnimationStyle.ELASTIC,
                 "Пружинящая анимация с отскоком");
-        UIButton back = createButton("Back overshoot", AnimationStyle.BACK,
+        UIButton back = createShowcaseButton("Back overshoot", AnimationStyle.BACK,
                 "Плавная анимация с перелётом");
-        UIButton linear = createButton("Linear glow", AnimationStyle.LINEAR,
+        UIButton linear = createShowcaseButton("Linear glow", AnimationStyle.LINEAR,
                 "Линейное свечение без излишней динамики");
 
         buttonRow.addChild(elastic);
@@ -95,6 +106,28 @@ public class GuiUtilsScreen extends Screen {
         statusLabel.setColor(0xFFB5E4FF);
         window.addChild(statusLabel);
 
+        UIFlowContainer toggleRow = new UIFlowContainer();
+        toggleRow.setLayout(FlexLayout.horizontal().spacing(6.0));
+
+        UILabel toggleLabel = new UILabel("Тёмная тема");
+        toggleLabel.setColor(0xFFE0E0E0);
+
+        themeToggle = new UIToggle("Переключить");
+        themeToggle.setPreferredSize(new Vec2(110, 22));
+        themeToggle.setOnClick(button -> toggleTheme());
+        registerInteractive(themeToggle, "Активирует более контрастную палитру окна");
+
+        toggleRow.addChild(toggleLabel);
+        toggleRow.addChild(themeToggle);
+        window.addChild(toggleRow);
+
+        showModalButton = new UIButton("Показать справку");
+        showModalButton.setPreferredSize(new Vec2(160, 22));
+        showModalButton.setAnimationStyle(AnimationStyle.BACK);
+        showModalButton.setOnClick(button -> showModal());
+        registerInteractive(showModalButton, "Открывает модальное окно с подсказками");
+        window.addChild(showModalButton);
+
         featureList = new UIFlowContainer();
         featureList.setLayout(FlexLayout.vertical().spacing(4.0));
         featureList.setPreferredSize(new Vec2(0.0, 112.0));
@@ -102,11 +135,55 @@ public class GuiUtilsScreen extends Screen {
 
         root.addChild(window);
 
+        modal = new UIModal();
+        modal.setLayout(new ConstraintLayout());
+        modal.setPreferredSize(new Vec2(360, 240));
+
+        modalWindow = new UIPanel(FlexLayout.vertical().spacing(6.0));
+        modalWindow.setPadding(10.0);
+        modalWindow.setBackgroundColor(0xEE2A2A2A);
+        modalWindow.setBorderColor(0x66FFFFFF);
+        modalWindow.setPreferredSize(new Vec2(260, 140));
+
+        UILabel modalTitle = new UILabel("Подсказки по UTIL");
+        modalTitle.setCentered(true);
+        modalTitle.setColor(0xFFFFFFFF);
+        modalWindow.addChild(modalTitle);
+
+        UILabel modalLineOne = new UILabel("Используйте поиск, переключатель тем и кнопки,");
+        modalLineOne.setExpandHorizontally(true);
+        modalLineOne.setColor(0xFFCCE8FF);
+        modalWindow.addChild(modalLineOne);
+
+        UILabel modalLineTwo = new UILabel("чтобы увидеть работу всех компонентов UTIL.");
+        modalLineTwo.setExpandHorizontally(true);
+        modalLineTwo.setColor(0xFFCCE8FF);
+        modalWindow.addChild(modalLineTwo);
+
+        closeModalButton = new UIButton("Понятно");
+        closeModalButton.setPreferredSize(new Vec2(92, 20));
+        closeModalButton.setOnClick(button -> hideModal());
+        registerInteractive(closeModalButton, "Закрывает модальное окно");
+        modalWindow.addChild(closeModalButton);
+
+        modalBackdrop = new UISpacer(0.0, 0.0);
+        modal.addChild(modalBackdrop);
+        modal.addChild(modalWindow);
+        modal.setVisible(false);
+        root.addChild(modal);
+
         renderer = new GuiSurfaceRenderer(this);
         updateFeatureList("");
     }
 
-    private UIButton createButton(String text, AnimationStyle style, String description) {
+    private void registerInteractive(UIButton button, String description) {
+        interactiveButtons.add(button);
+        if (description != null) {
+            buttonDescriptions.put(button, description);
+        }
+    }
+
+    private UIButton createShowcaseButton(String text, AnimationStyle style, String description) {
         UIButton button = new UIButton(text);
         button.setAnimationStyle(style);
         button.setPreferredSize(new Vec2(108, 22));
@@ -124,13 +201,43 @@ public class GuiUtilsScreen extends Screen {
             default:
                 break;
         }
-        buttons.add(button);
-        buttonDescriptions.put(button, description);
+        registerInteractive(button, description);
         return button;
     }
 
     private void handleButtonClick(UIButton button, String description) {
         persistentStatus = "Нажата: " + button.getText() + " — " + description;
+        statusLabel.setText(persistentStatus);
+    }
+
+    private void toggleTheme() {
+        darkThemeEnabled = !darkThemeEnabled;
+        themeToggle.setChecked(darkThemeEnabled);
+
+        if (darkThemeEnabled) {
+            window.setBackgroundColor(0xEE0F1A24);
+            window.setBorderColor(0x66A5D8FF);
+            statusLabel.setColor(0xFF9BD6FF);
+            persistentStatus = "Тёмная тема активирована — освежите взгляд";
+        } else {
+            window.setBackgroundColor(0xEE1E1E1E);
+            window.setBorderColor(0x55FFFFFF);
+            statusLabel.setColor(0xFFB5E4FF);
+            persistentStatus = "Светлая тема — hover, чтобы увидеть анимации";
+        }
+
+        statusLabel.setText(persistentStatus);
+    }
+
+    private void showModal() {
+        modalVisible = true;
+        modal.setVisible(true);
+        statusLabel.setText("Открыто модальное окно со справкой");
+    }
+
+    private void hideModal() {
+        modalVisible = false;
+        modal.setVisible(false);
         statusLabel.setText(persistentStatus);
     }
 
@@ -165,19 +272,33 @@ public class GuiUtilsScreen extends Screen {
 
         renderer.bind(matrices);
         UIContext context = new UIContext(System.currentTimeMillis());
+        modalBackdrop.setPreferredSize(new Vec2(width, height));
         root.measure(new Vec2(width, height));
         root.render(context, renderer, new Rect(0, 0, width, height));
     }
 
     private void updateHoverState(int mouseX, int mouseY) {
         boolean hoveredAny = false;
-        for (UIButton button : buttons) {
+        for (UIButton button : interactiveButtons) {
+            if (modalVisible && button != closeModalButton) {
+                button.setHovered(false);
+                continue;
+            }
             Rect bounds = button.getLastRenderRect();
             boolean hovered = bounds.contains(mouseX, mouseY);
             button.setHovered(hovered);
             if (hovered) {
                 hoveredAny = true;
-                statusLabel.setText("Hover: " + buttonDescriptions.get(button));
+                String description = buttonDescriptions.get(button);
+                if (description != null) {
+                    statusLabel.setText("Hover: " + description);
+                } else if (button == themeToggle) {
+                    statusLabel.setText("Hover: переключатель темы оформления");
+                } else if (button == showModalButton) {
+                    statusLabel.setText("Hover: кнопка справки");
+                } else if (button == closeModalButton) {
+                    statusLabel.setText("Hover: закрыть модальное окно");
+                }
             }
         }
 
@@ -197,8 +318,18 @@ public class GuiUtilsScreen extends Screen {
             consumed = true;
         }
 
-        for (Map.Entry<UIButton, String> entry : buttonDescriptions.entrySet()) {
-            UIButton uiButton = entry.getKey();
+        if (modalVisible) {
+            Rect modalBounds = modalWindow.getLastRenderRect();
+            if (!modalBounds.contains(mouseX, mouseY)) {
+                hideModal();
+                return true;
+            }
+        }
+
+        for (UIButton uiButton : interactiveButtons) {
+            if (modalVisible && uiButton != closeModalButton) {
+                continue;
+            }
             if (uiButton.getLastRenderRect().contains(mouseX, mouseY)) {
                 uiButton.click();
                 consumed = true;
@@ -212,6 +343,10 @@ public class GuiUtilsScreen extends Screen {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == Keyboard.KEY_ESCAPE || keyCode == GLFW_KEY_ESCAPE) {
+            if (modalVisible) {
+                hideModal();
+                return true;
+            }
             Minecraft.getInstance().setScreen(null);
             return true;
         }
