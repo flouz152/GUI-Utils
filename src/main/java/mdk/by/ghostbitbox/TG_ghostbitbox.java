@@ -8,10 +8,12 @@ import net.labymod.settings.elements.ControlElement.IconData;
 import net.labymod.settings.elements.SettingsElement;
 import net.labymod.utils.Material;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.screen.Screen;
 import org.lwjgl.input.Keyboard;
 
 public class TG_ghostbitbox extends LabyModAddon {
+
+  private static final int GLFW_KEY_R = 82;
 
   @Override
   public void onEnable() {
@@ -28,17 +30,20 @@ public class TG_ghostbitbox extends LabyModAddon {
 
   @Override
   public void onKey(int keyCode, boolean pressed) {
-    if (keyCode != Keyboard.KEY_R || !pressed) {
+    if (!pressed || !isToggleKey(keyCode)) {
       return;
     }
 
-    Minecraft minecraft = Minecraft.getMinecraft();
-    GuiScreen current = minecraft.getCurrentScreen();
+    Minecraft minecraft = Minecraft.getInstance();
+    Screen current = minecraft.getCurrentScreen();
     if (current instanceof GuiUtilsScreen) {
-      minecraft.displayGuiScreen(null);
-      return;
+      minecraft.setScreen(null);
+    } else {
+      minecraft.setScreen(new GuiUtilsScreen());
     }
+  }
 
-    minecraft.displayGuiScreen(new GuiUtilsScreen());
+  private boolean isToggleKey(int keyCode) {
+    return keyCode == Keyboard.KEY_R || keyCode == GLFW_KEY_R;
   }
 }

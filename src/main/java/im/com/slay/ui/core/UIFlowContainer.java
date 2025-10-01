@@ -14,7 +14,7 @@ public final class UIFlowContainer extends UIContainer {
     }
 
     @Override
-    public void onRender(UIContext context, SurfaceRenderer renderer, Rect rect) {
+    protected void onRender(UIContext context, SurfaceRenderer renderer, Rect rect) {
         if (getLayout() != null) {
             getLayout().layout(this, rect, context, renderer);
         }

@@ -55,7 +55,7 @@ public class UIPanel extends UIContainer {
     }
 
     @Override
-    public void onRender(UIContext context, SurfaceRenderer renderer, Rect rect) {
+    protected void onRender(UIContext context, SurfaceRenderer renderer, Rect rect) {
         renderer.fillRect(rect, backgroundColor);
 
         // Draw a simple border outline.

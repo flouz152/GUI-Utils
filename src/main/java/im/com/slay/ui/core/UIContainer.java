@@ -58,7 +58,7 @@ public class UIContainer extends UIComponent {
     }
 
     @Override
-    public void onRender(UIContext context, SurfaceRenderer renderer, Rect rect) {
+    protected void onRender(UIContext context, SurfaceRenderer renderer, Rect rect) {
         if (layout != null) {
             layout.layout(this, rect, context, renderer);
             return;

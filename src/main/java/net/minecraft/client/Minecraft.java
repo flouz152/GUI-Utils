@@ -1,6 +1,7 @@
 package net.minecraft.client;
 
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.screen.Screen;
 
 /**
  * Minimal stub of the Minecraft client used for compilation.
@@ -9,23 +10,40 @@ public class Minecraft {
 
     private static final Minecraft INSTANCE = new Minecraft();
 
-    private GuiScreen currentScreen;
+    private final FontRenderer fontRenderer = new FontRenderer();
+    private Screen currentScreen;
 
-    public static Minecraft getMinecraft() {
+    public static Minecraft getInstance() {
         return INSTANCE;
     }
 
-    public void displayGuiScreen(GuiScreen screen) {
+    /**
+     * Legacy accessor retained for backwards compatibility with existing code paths.
+     */
+    public static Minecraft getMinecraft() {
+        return getInstance();
+    }
+
+    public FontRenderer getFontRenderer() {
+        return fontRenderer;
+    }
+
+    public void setScreen(Screen screen) {
         if (currentScreen != null) {
-            currentScreen.onGuiClosed();
+            currentScreen.onClose();
+            currentScreen.removed();
         }
         currentScreen = screen;
         if (currentScreen != null) {
-            currentScreen.initGui();
+            currentScreen.init(this, 854, 480);
         }
     }
 
-    public GuiScreen getCurrentScreen() {
+    public void displayGuiScreen(Screen screen) {
+        setScreen(screen);
+    }
+
+    public Screen getCurrentScreen() {
         return currentScreen;
     }
 }

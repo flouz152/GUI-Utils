@@ -11,6 +11,14 @@ import org.lwjgl.input.Keyboard;
  */
 public class UITextField extends UIComponent {
 
+    private static final int GLFW_KEY_BACKSPACE = 259;
+    private static final int GLFW_KEY_ENTER = 257;
+    private static final int GLFW_KEY_DELETE = 261;
+    private static final int GLFW_KEY_LEFT = 263;
+    private static final int GLFW_KEY_RIGHT = 262;
+    private static final int GLFW_KEY_HOME = 268;
+    private static final int GLFW_KEY_END = 269;
+
     private final String placeholder;
     private String text = "";
     private boolean focused;
@@ -19,7 +27,7 @@ public class UITextField extends UIComponent {
 
     public UITextField(String placeholder) {
         this.placeholder = placeholder;
-        setPreferredSize(new Vec2(220, 20));
+        setPreferredSize(new Vec2(240, 20));
     }
 
     public void setOnChanged(Consumer<String> onChanged) {
@@ -44,20 +52,51 @@ public class UITextField extends UIComponent {
         notifyChanged();
     }
 
-    public void handleKeyTyped(char typedChar, int keyCode) {
-        if (keyCode == Keyboard.KEY_BACK) {
-            backspace();
-            return;
+    public boolean handleKeyPressed(int keyCode, int scanCode, int modifiers) {
+        switch (keyCode) {
+            case Keyboard.KEY_BACK:
+            case GLFW_KEY_BACKSPACE:
+                backspace();
+                return true;
+            case Keyboard.KEY_RETURN:
+            case GLFW_KEY_ENTER:
+                notifyChanged();
+                return true;
+            case Keyboard.KEY_DELETE:
+            case GLFW_KEY_DELETE:
+                delete();
+                return true;
+            case Keyboard.KEY_LEFT:
+            case GLFW_KEY_LEFT:
+                moveCaret(-1);
+                return true;
+            case Keyboard.KEY_RIGHT:
+            case GLFW_KEY_RIGHT:
+                moveCaret(1);
+                return true;
+            case Keyboard.KEY_HOME:
+            case GLFW_KEY_HOME:
+                caretPosition = 0;
+                return true;
+            case Keyboard.KEY_END:
+            case GLFW_KEY_END:
+                caretPosition = text.length();
+                return true;
+            default:
+                return false;
         }
+    }
 
-        if (keyCode == Keyboard.KEY_RETURN) {
-            notifyChanged();
-            return;
+    public boolean handleCharTyped(char typedChar, int modifiers) {
+        if (Character.isISOControl(typedChar)) {
+            return false;
         }
+        insertChar(typedChar);
+        return true;
+    }
 
-        if (!Character.isISOControl(typedChar)) {
-            insertChar(typedChar);
-        }
+    private void moveCaret(int delta) {
+        caretPosition = Math.max(0, Math.min(text.length(), caretPosition + delta));
     }
 
     private void insertChar(char typedChar) {
@@ -76,6 +115,16 @@ public class UITextField extends UIComponent {
         String suffix = text.substring(caretPosition);
         text = prefix + suffix;
         caretPosition--;
+        notifyChanged();
+    }
+
+    private void delete() {
+        if (caretPosition >= text.length()) {
+            return;
+        }
+        String prefix = text.substring(0, caretPosition);
+        String suffix = text.substring(caretPosition + 1);
+        text = prefix + suffix;
         notifyChanged();
     }
 
