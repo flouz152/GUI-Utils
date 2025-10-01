@@ -35,7 +35,7 @@ public class ConstraintLayout implements Layout {
             double childX = baseX + (width - childSize.getX()) / 2.0;
             double childY = baseY + (height - childSize.getY()) / 2.0;
             Rect childBounds = new Rect(childX, childY, childSize.getX(), childSize.getY());
-            child.onRender(context, renderer, childBounds);
+            child.render(context, renderer, childBounds);
         }
     }
 }

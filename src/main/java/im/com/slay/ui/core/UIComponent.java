@@ -11,6 +11,7 @@ import im.com.slay.ui.render.SurfaceRenderer;
 public abstract class UIComponent {
 
     private Vec2 preferredSize = Vec2.ZERO;
+    private Rect lastRenderRect = Rect.EMPTY;
 
     public Vec2 getPreferredSize() {
         return preferredSize;
@@ -30,5 +31,14 @@ public abstract class UIComponent {
         return preferredSize != null ? preferredSize : Vec2.ZERO;
     }
 
-    public abstract void onRender(UIContext context, SurfaceRenderer renderer, Rect rect);
+    public final void render(UIContext context, SurfaceRenderer renderer, Rect rect) {
+        lastRenderRect = rect;
+        onRender(context, renderer, rect);
+    }
+
+    public Rect getLastRenderRect() {
+        return lastRenderRect;
+    }
+
+    protected abstract void onRender(UIContext context, SurfaceRenderer renderer, Rect rect);
 }

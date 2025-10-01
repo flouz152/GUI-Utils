@@ -8,4 +8,10 @@ import im.com.slay.ui.geometry.Rect;
 public interface SurfaceRenderer {
 
     void fillRect(Rect rect, int color);
+
+    default void drawString(String text, double x, double y, int color) {
+    }
+
+    default void drawCenteredString(String text, double centerX, double y, int color) {
+    }
 }

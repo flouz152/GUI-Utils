@@ -65,7 +65,11 @@ public class UIContainer extends UIComponent {
         }
 
         for (UIComponent child : children) {
-            child.onRender(context, renderer, rect);
+            child.render(context, renderer, rect);
         }
+    }
+
+    public void clearChildren() {
+        children.clear();
     }
 }

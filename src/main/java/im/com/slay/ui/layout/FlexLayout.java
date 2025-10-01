@@ -77,7 +77,7 @@ public class FlexLayout implements Layout {
         for (UIComponent child : container.getChildren()) {
             Vec2 size = child.getPreferredSize();
             Rect childBounds = new Rect(cursorX, cursorY, size.getX(), size.getY());
-            child.onRender(context, renderer, childBounds);
+            child.render(context, renderer, childBounds);
             if (direction == Direction.HORIZONTAL) {
                 cursorX += size.getX() + spacing;
             } else {

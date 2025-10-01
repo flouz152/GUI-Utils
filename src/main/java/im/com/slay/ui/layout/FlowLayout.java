@@ -43,7 +43,7 @@ public class FlowLayout implements Layout {
         for (UIComponent child : container.getChildren()) {
             Vec2 size = child.getPreferredSize();
             Rect childBounds = new Rect(bounds.getX(), cursorY, size.getX(), size.getY());
-            child.onRender(context, renderer, childBounds);
+            child.render(context, renderer, childBounds);
             cursorY += size.getY() + spacing;
         }
     }

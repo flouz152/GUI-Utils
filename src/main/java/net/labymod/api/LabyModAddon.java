@@ -10,4 +10,7 @@ public abstract class LabyModAddon {
     public abstract void loadConfig();
 
     protected abstract void fillSettings(List<SettingsElement> list);
+
+    public void onKey(int keyCode, boolean pressed) {
+    }
 }
