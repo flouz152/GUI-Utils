@@ -28,19 +28,44 @@ public class TG_ghostbitbox extends LabyModAddon {
     list.add(new BooleanElement("test", new IconData(Material.ACACIA_FENCE)));
   }
 
+  private boolean toggleHeld;
+
   @Override
   public void onKey(int keyCode, boolean pressed) {
-    if (!pressed || !isToggleKey(keyCode)) {
+    if (!isToggleKey(keyCode)) {
       return;
     }
 
+    if (pressed) {
+      if (toggleHeld) {
+        return;
+      }
+      toggleHeld = true;
+      toggleShowcase();
+    } else {
+      toggleHeld = false;
+    }
+  }
+
+  private void toggleShowcase() {
     Minecraft minecraft = Minecraft.getInstance();
     Screen current = minecraft.getCurrentScreen();
     if (current instanceof GuiUtilsScreen) {
-      minecraft.setScreen(null);
+      closeScreen(minecraft);
     } else {
-      minecraft.setScreen(new GuiUtilsScreen());
+      openScreen(minecraft);
     }
+  }
+
+  private void openScreen(Minecraft minecraft) {
+    GuiUtilsScreen screen = new GuiUtilsScreen();
+    minecraft.setScreen(screen);
+    minecraft.displayGuiScreen(screen);
+  }
+
+  private void closeScreen(Minecraft minecraft) {
+    minecraft.setScreen(null);
+    minecraft.displayGuiScreen(null);
   }
 
   private boolean isToggleKey(int keyCode) {

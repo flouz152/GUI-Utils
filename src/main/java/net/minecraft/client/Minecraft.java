@@ -29,6 +29,10 @@ public class Minecraft {
     }
 
     public void setScreen(Screen screen) {
+        if (currentScreen == screen) {
+            return;
+        }
+
         if (currentScreen != null) {
             currentScreen.onClose();
             currentScreen.removed();
