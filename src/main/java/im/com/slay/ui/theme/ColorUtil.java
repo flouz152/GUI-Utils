@@ -56,4 +56,21 @@ public final class ColorUtil {
         int b = (int) Math.round(fb * clamp + bb * inv);
         return (a << 24) | (r << 16) | (g << 8) | b;
     }
+
+    public static int lerp(int start, int end, double amount) {
+        double clamp = Math.max(0.0, Math.min(1.0, amount));
+        int sa = (start >> 24) & 0xFF;
+        int sr = (start >> 16) & 0xFF;
+        int sg = (start >> 8) & 0xFF;
+        int sb = start & 0xFF;
+        int ea = (end >> 24) & 0xFF;
+        int er = (end >> 16) & 0xFF;
+        int eg = (end >> 8) & 0xFF;
+        int eb = end & 0xFF;
+        int a = (int) Math.round(sa + (ea - sa) * clamp);
+        int r = (int) Math.round(sr + (er - sr) * clamp);
+        int g = (int) Math.round(sg + (eg - sg) * clamp);
+        int b = (int) Math.round(sb + (eb - sb) * clamp);
+        return (a << 24) | (r << 16) | (g << 8) | b;
+    }
 }

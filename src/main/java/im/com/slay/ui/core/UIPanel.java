@@ -16,6 +16,11 @@ public class UIPanel extends UIContainer {
     private double cornerRadius = 12;
     private double elevation = 8;
     private double sheen = 0.35;
+    private double glassiness = 0.0;
+    private int accentColor = 0xFF00A3FF;
+    private double glowIntensity = 0.0;
+    private double glowSpread = 42.0;
+    private int glowColor = 0xFF00A3FF;
 
     public UIPanel() {
         super(FlexLayout.vertical());
@@ -55,6 +60,47 @@ public class UIPanel extends UIContainer {
         return sheen;
     }
 
+    public UIPanel glass(double glassiness) {
+        this.glassiness = Math.max(0.0, Math.min(1.0, glassiness));
+        return this;
+    }
+
+    public double getGlassiness() {
+        return glassiness;
+    }
+
+    public UIPanel accentColor(int accentColor) {
+        this.accentColor = accentColor;
+        return this;
+    }
+
+    public int getAccentColor() {
+        return accentColor;
+    }
+
+    public UIPanel glow(int color, double intensity) {
+        return glow(color, intensity, glowSpread);
+    }
+
+    public UIPanel glow(int color, double intensity, double spread) {
+        this.glowColor = color;
+        this.glowIntensity = Math.max(0.0, intensity);
+        this.glowSpread = Math.max(8.0, spread);
+        return this;
+    }
+
+    public double getGlowIntensity() {
+        return glowIntensity;
+    }
+
+    public double getGlowSpread() {
+        return glowSpread;
+    }
+
+    public int getGlowColor() {
+        return glowColor;
+    }
+
     @Override
     protected Vec2 onMeasure(Vec2 availableSize) {
         return new Vec2(Math.min(availableSize.getX(), 360), Math.min(availableSize.getY(), 240));
@@ -62,6 +108,13 @@ public class UIPanel extends UIContainer {
 
     @Override
     protected void onRender(UIContext context, SurfaceRenderer renderer, Rect bounds) {
-        SurfaceRendererExtensions.drawElevatedPanel(renderer, bounds, backgroundColor, cornerRadius, elevation, sheen);
+        if (glowIntensity > 0.0) {
+            SurfaceRendererExtensions.drawGlow(renderer, bounds, glowColor, cornerRadius, glowIntensity, glowSpread);
+        }
+        if (glassiness > 0.0) {
+            SurfaceRendererExtensions.drawGlassPanel(renderer, bounds, backgroundColor, accentColor, cornerRadius, elevation, sheen, glassiness);
+        } else {
+            SurfaceRendererExtensions.drawElevatedPanel(renderer, bounds, backgroundColor, cornerRadius, elevation, sheen);
+        }
     }
 }
