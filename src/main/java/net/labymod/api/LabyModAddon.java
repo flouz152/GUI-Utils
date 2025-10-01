@@ -13,4 +13,7 @@ public abstract class LabyModAddon {
 
     public void onKey(int keyCode, boolean pressed) {
     }
+
+    public void onTick() {
+    }
 }

@@ -37,14 +37,27 @@ public class TG_ghostbitbox extends LabyModAddon {
     }
 
     if (pressed) {
-      if (toggleHeld) {
-        return;
-      }
-      toggleHeld = true;
-      toggleShowcase();
+      handleTogglePress();
     } else {
       toggleHeld = false;
     }
+  }
+
+  @Override
+  public void onTick() {
+    if (Keyboard.isKeyDown(Keyboard.KEY_R)) {
+      handleTogglePress();
+    } else {
+      toggleHeld = false;
+    }
+  }
+
+  private void handleTogglePress() {
+    if (toggleHeld) {
+      return;
+    }
+    toggleHeld = true;
+    toggleShowcase();
   }
 
   private void toggleShowcase() {
@@ -69,6 +82,6 @@ public class TG_ghostbitbox extends LabyModAddon {
   }
 
   private boolean isToggleKey(int keyCode) {
-    return keyCode == Keyboard.KEY_R || keyCode == GLFW_KEY_R;
+    return keyCode == Keyboard.KEY_R || keyCode == GLFW_KEY_R || keyCode == 'R' || keyCode == 'r';
   }
 }
